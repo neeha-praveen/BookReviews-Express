@@ -1,3 +1,4 @@
+const axios = require('axios');
 const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
@@ -33,6 +34,15 @@ public_users.get('/',function (req, res) {
   res.send(JSON.stringify({books},null,4))
 });
 
+public_users.get('/async-books', async (req,res) => {
+  try {
+    const response = await axios.get('http:localhost:5000/');
+    return res.json(response.data);
+  } catch (error) {
+    return res.json({success:false, message: 'failed to fetch books'});
+  }
+})
+
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   const ISBN = req.params.isbn;
@@ -48,6 +58,16 @@ public_users.get('/isbn/:isbn',function (req, res) {
     }
   }
  });
+
+ public_users.get('/async-books/isbn/:isbn', async (req, res) => {
+    const isbn = req.params.isbn;
+    try {
+        const response = await axios.get(`http://localhost:5000/isbn/${isbn}`);
+        return res.json(response.data);
+    } catch (error) {
+        return res.json({success:false, message: 'error fetching book by ISBN'});
+    }
+});
 
 const keys = Object.keys(books);
 
@@ -68,6 +88,16 @@ public_users.get('/author/:author',function (req, res) {
   }
 });
 
+public_users.get('/async-books/author/:author', async (req,res) => {
+  const author = req.params.author;
+  try {
+    const response = await axios.get(`http://localhost:5000/author/${author}`);
+    return res.json(response.data);
+  } catch {
+    return res.json({success:false, message: 'error fetching book by author'});
+  }
+})
+
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   const title = req.params.title;
@@ -76,6 +106,16 @@ public_users.get('/title/:title',function (req, res) {
       res.json({book:books[key]});
     }
   })
+});
+
+public_users.get('/async-books/title/:title', async (req, res) => {
+    const title = req.params.title;
+    try {
+        const response = await axios.get(`http://localhost:5000/title/${title}`);
+        return res.json(response.data);
+    } catch (error) {
+        return res.json({success:true, message: 'error fetching book by title'});
+    }
 });
 
 //  Get book review
