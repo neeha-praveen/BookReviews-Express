@@ -4,10 +4,28 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+const doesExist = (username) => {
+  let userexists = users.filter((user)=>user.username===username)
+  if(userexists.length===0){
+    return false;
+  } else {
+    return true;
+  }
+}
 
 public_users.post("/register", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const username = req.body.username;
+  const password = req.body.password;
+  if (username && password){
+    if(doesExist(username)) {
+      res.json({message:'user already exists'});
+    } else {
+      users.push({'username':username,'password':password});
+      res.json({success:true,message:'successfully registered'});
+    }
+  } else {
+    res.json({success:false,message:'error registering'});
+  }
 });
 
 // Get the book list available in the shop
@@ -62,8 +80,9 @@ public_users.get('/title/:title',function (req, res) {
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const ISBN = req.params.isbn;
+  review=books[ISBN].review;
+  res.send(JSON.stringify({review},null,4));
 });
 
 module.exports.general = public_users;
